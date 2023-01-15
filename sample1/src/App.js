@@ -1,21 +1,38 @@
 import { useState, useEffect } from 'react';
 import Note from './components/Note';
-import axios from 'axios';
+import noteServices from './services/notes';
+import Notifications from './components/Notifications';
+
+
+/**
+ * Using inline CSS rules for a component 
+ */
+import Footer from './components/Footer';
 
 const App = () => {
   
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('a new note...');
   const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null)
 
 
-
+  /************************************************************ 
+   * Getting data from the server is achieved as follows
+  ************************************************************/
   const hook = () => {
-    axios
+    /*axios
       .get('http://localhost:3001/notes')
       .then(response => {
         setNotes(response.data)
-      })
+      })*/
+
+    noteServices
+      .getAll()
+      .then(initialNotes=> {
+      setNotes(initialNotes)
+    })
+
   }
 
   useEffect(hook, [])
@@ -27,16 +44,80 @@ const App = () => {
     event.preventDefault();
     
     const newNoteObject = {
-      id : notes.length + 1,
+      // id : notes.length + 1,
       content : newNote,
       date : new Date().toISOString(),
       important : Math.random() < 0.5
     }
-    
-    setNotes(notes.concat(newNoteObject));
-    console.log('new note object', notes.concat(newNoteObject)) 
-    setNewNote('a new note...');
 
+
+    /************************************************************ 
+     * Posting (saving) data to the server is achieved as follows
+     * so that it persists in the database server.
+    ************************************************************/
+   /*axios
+   .post('http://localhost:3001/notes', newNoteObject)
+      .then(response => {
+        setNotes(notes.concat(response.data))
+        setNewNote('')
+      }
+      )
+    }*/
+
+    noteServices
+      .create(newNoteObject)
+      .then(newlyAddedNote => {
+          setNotes(notes.concat(newlyAddedNote))
+          setNewNote('')
+        }
+      )
+
+
+  }
+    
+    const toggleImportanceOf = (id) => {
+      // const exactNoteUrl = `http://localhost:3001/notes/${id}`
+      const exactNote = notes.find(note => note.id === id)  // This is just a mere copy of the targetted note object.
+      const exactNoteChangedImportantStatus = {...exactNote, important: !exactNote.important} // only the important property or key of the copied note, is changed
+      
+      
+      /************************************************************ 
+         * Put is used to make partial update to a data object 
+         * resource and sent such to the server for persistency.
+      ************************************************************/
+      /************************************************************
+       * Sending the copy of the exact note with important's field, having 
+       * negation of its value from the original note from where we have copied.
+      ************************************************************/
+    /*axios
+      .put(exactNoteUrl, exactNoteChangedImportantStatus)
+      .then(response => {
+          // every other note object is copied but the targetted note is replaced with object returned from the server
+          setNotes(notes.map(note => note.id !== id? note : response.data)) 
+        }
+        )*/
+        
+        noteServices
+        .update(id, exactNoteChangedImportantStatus)
+        .then(returnedModifiedNote => {
+            // every other note object is copied but the targetted note is replaced with object returned from the server
+            setNotes(notes.map(
+              note => note.id !== id? note : returnedModifiedNote
+            )
+            )
+        }
+      )
+      .catch(error => {
+            setErrorMessage(
+              `Note '${exactNote.content}' was already removed from server`
+            )
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 7000)
+            // alert(`the note: ${exactNote.content} was already deleted from the server`)
+            setNotes(notes.filter(note => note.id !== id))
+
+      })
   }
 
   const handleNoteChange = (event) => {
@@ -44,22 +125,29 @@ const App = () => {
   }
 
   return (
-    <div>
-      <h1>Notes</h1>
-      <ul>
-        {notesToShow.map(note => 
-          <Note key={note.id} note={note} />
-        )}
-      </ul>
+    <>
+      <div>
+        <h1>Notes</h1>
+        {/* Testing creation of our own error customized notification */}
+        <Notifications message={errorMessage} />
+        <ul>
+          {notesToShow.map(note => 
+            <Note key={note.id} note={note} toggleImportance={() => toggleImportanceOf(note.id)} />
+          )}
+        </ul>
+  
+        <button onClick={() => setShowAll(!showAll)}> Show {showAll? 'Important Notes' : 'All Notes'} </button>
+  
+  
+        <form onSubmit={addNote}>
+          <input value={newNote} onChange={handleNoteChange} />
+          <button type='submit'>save</button>
+        </form>
+      </div>
+  
+      <Footer />
+    </>
 
-      <button onClick={() => setShowAll(!showAll)}> Show {showAll? 'Important Notes' : 'All Notes'} </button>
-
-
-      <form onSubmit={addNote}>
-        <input value={newNote} onChange={handleNoteChange} />
-        <button type='submit'>save</button>
-      </form>
-    </div>
   )
 }
 
