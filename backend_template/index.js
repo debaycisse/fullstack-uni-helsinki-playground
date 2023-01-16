@@ -1,4 +1,5 @@
 // expressJS server setup
+const { request } = require('express')
 const { response } = require('express')
 const express = require('express')
 
@@ -22,18 +23,31 @@ let notes = [
       content: "GET and POST are the most important methods of HTTP protocol",
       date: "2022-05-30T19:20:14.298Z",
       important: true
+    },
+    {
+      id: 4,
+      content: "GET and POST are the most important methods of HTTP protocol",
+      date: "2023-01-30T19:20:14.298Z",
+      important: true
     }
   ]
 
-
+// Route for the root - returns all an H1 element.
 app.get('/', (request, response) => {
     response.send('<h1>Hello, World - from ExpressJS</h1>')
 })
 
+// Route for all note's objects or resources - returns all note's objects or resources
 app.get('/api/notes', (request, response) => {
     response.json(notes)
 })
 
+// Route for a specific note
+app.get('/api/notes:id', (request, response) => {
+  const id = request.params.id
+  const note = notes.find(note => note.id === id)
+  response.json(note)
+})
 
 const PORT = 3001
 app.listen(PORT, () => {
