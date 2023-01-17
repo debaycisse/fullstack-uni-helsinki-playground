@@ -1,9 +1,8 @@
 // expressJS server setup
-const { request } = require('express')
-const { response } = require('express')
 const express = require('express')
 
 const app = express()
+app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources 
 
 let notes = [
     {
@@ -42,11 +41,32 @@ app.get('/api/notes', (request, response) => {
     response.json(notes)
 })
 
-// Route for a specific note
-app.get('/api/notes:id', (request, response) => {
-  const id = request.params.id
+// Route for getting or fetching a specific note via its id number
+app.get('/api/notes/:id', (request, response) => {
+  const id = Number(request.params.id)
   const note = notes.find(note => note.id === id)
-  response.json(note)
+
+  // Handle the scenerio when a requested resource does not exist
+  if(note){
+    response.json(note)
+  }else{
+    response.statusMessage = 
+      "The requested resource's id does not exist in the DB, please, ensure that the resources exists and use its correct id in your request."
+    response.status(404).send()
+  }
+})
+
+// Route for deleting a specific note via its id number
+app.delete('/api/notes/:id', (request, response) => {
+  const id = Number(request.params.id)
+  notes = notes.filter(note => note.id !== id)
+  response.status(204).end()
+})
+
+app.post('/api/notes', (request, response) => {
+  const newNote = request.body
+  console.log('new note: ', newNote)
+  response.json(newNote)
 })
 
 const PORT = 3001
