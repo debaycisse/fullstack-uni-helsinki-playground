@@ -63,9 +63,37 @@ app.delete('/api/notes/:id', (request, response) => {
   response.status(204).end()
 })
 
+const generateId = () => {
+  const maxId = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
+  return maxId + 1
+}
+
 app.post('/api/notes', (request, response) => {
-  const newNote = request.body
-  console.log('new note: ', newNote)
+  // const maxID = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
+  // const newNote = request.body
+  // newNote.id = maxID + 1
+
+  // notes.concat(newNote)
+
+  // response.json(newNote)
+
+  // check to know if the request is empty
+  const body = request.body
+  if(!body.content){
+    response.status(400).json({
+      "error": "Missing content."
+    })
+  }
+
+  const newNote = {
+    "content": body.content,
+    "important": body.important || false,
+    "date": new Date(),
+    "id": generateId()
+  }
+
+  notes.concat(newNote)
+
   response.json(newNote)
 })
 
