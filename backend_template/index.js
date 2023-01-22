@@ -1,15 +1,16 @@
-// expressJS server setup
 const express = require('express')
 
 const app = express()
-app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources 
+
+const cors = require('cors')
+
 
 let notes = [
-    {
-      id: 1,
-      content: "HTML is easy",
-      date: "2022-05-30T17:30:31.098Z",
-      important: true
+  {
+    id: 1,
+    content: "HTML is easy",
+    date: "2022-05-30T17:30:31.098Z",
+    important: true
     },
     {
       id: 2,
@@ -31,8 +32,27 @@ let notes = [
     }
   ]
 
+  
+const requestLogger = (request, response, next) => {
+  console.log('Method: ', request.method);
+  console.log('Path: ', request.path);
+  console.log('Body: ', request.body);
+  console.log('------------------------');
+  next()
+}
+
+
+app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources 
+
+app.use(requestLogger)
+
+app.use(cors())
+
+
 // Route for the root - returns all an H1 element.
 app.get('/', (request, response) => {
+    /*const nextF = () => response.send('<h1>Hello, World - from ExpressJS</h1>')
+    app.use(requestLogger(request, response, nextF))*/
     response.send('<h1>Hello, World - from ExpressJS</h1>')
 })
 
@@ -97,7 +117,13 @@ app.post('/api/notes', (request, response) => {
   response.json(newNote)
 })
 
-const PORT = 3001
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
