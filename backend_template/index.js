@@ -4,6 +4,8 @@ const app = express()
 
 const cors = require('cors')
 
+const morgan = require('morgan')
+
 
 let notes = [
   {
@@ -48,6 +50,7 @@ app.use(requestLogger)
 
 app.use(cors())
 
+app.use(morgan('combined'))
 
 // Route for the root - returns all an H1 element.
 app.get('/', (request, response) => {
