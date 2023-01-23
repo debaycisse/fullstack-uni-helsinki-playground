@@ -52,6 +52,8 @@ app.use(cors())
 
 app.use(morgan('combined'))
 
+app.use(express.static('build'))
+
 // Route for the root - returns all an H1 element.
 app.get('/', (request, response) => {
     /*const nextF = () => response.send('<h1>Hello, World - from ExpressJS</h1>')
