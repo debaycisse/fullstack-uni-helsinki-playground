@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = 'https://backend-app-playground.onrender.com/api/notes'
+const baseUrl = '/api/notes'
 
 
 const getAll = () => {
