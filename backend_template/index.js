@@ -117,7 +117,14 @@ app.get('/api/notes', (request, response) => {
 
 // Route for getting or fetching a specific note via its id number
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  
+  Note.findById(request.params.id).then(returnedNote => {
+    response.json(returnedNote)
+  })
+
+
+  // ---------------------------------------------------------------------//
+  /*const id = Number(request.params.id)
   const note = notes.find(note => note.id === id)
 
   // Handle the scenerio when a requested resource does not exist
@@ -127,7 +134,7 @@ app.get('/api/notes/:id', (request, response) => {
     response.statusMessage = 
       "The requested resource's id does not exist in the DB, please, ensure that the resources exists and use its correct id in your request."
     response.status(404).send()
-  }
+  }*/
 })
 
 // Route for deleting a specific note via its id number
@@ -153,22 +160,24 @@ app.post('/api/notes', (request, response) => {
 
   // check to know if the request is empty
   const body = request.body
-  if(!body.content){
-    response.status(400).json({
+
+  if(body.content === undefined){
+    return response.status(400).json({
       "error": "Missing content."
     })
   }
 
-  const newNote = {
-    "content": body.content,
-    "important": body.important || false,
-    "date": new Date(),
-    "id": generateId()
-  }
+  const newNote = new Note(
+    {
+      content: body.content,
+      important: body.important || false
+    }
+  )
 
-  notes.concat(newNote)
+  newNote.save().then(savedNote => {
+    response.json(savedNote)
+  })
 
-  response.json(newNote)
 })
 
 
