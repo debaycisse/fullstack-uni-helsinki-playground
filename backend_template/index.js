@@ -1,3 +1,10 @@
+/**
+ * It's important that dotenv gets imported before the note model is imported. 
+ * This ensures that the environment variables from the .env file are available 
+ * globally before the code from the other modules is imported.
+ */
+require('dotenv').config()
+
 const express = require('express')
 
 const app = express()
@@ -6,8 +13,46 @@ const cors = require('cors')
 
 const morgan = require('morgan')
 
+const mongoose = require('mongoose')
 
-let notes = [
+const Note = require('./models/note')
+
+
+
+// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
+
+// const password = process.argv[2]
+
+// const password1 = process.env.REACT_APP_MONGODB_PASSWORD
+
+
+
+// const mongoDbUrl = `mongodb+srv://fullstack:${password}@cluster0.qsnhtah.mongodb.net/noteApp?retryWrites=true&w=majority`
+
+/*mongoose.set('strictQuery', false)
+mongoose.connect(process.env.MONGODB_URI)
+
+const noteSchema = mongoose.Schema(
+  {
+    content: String,
+    important: Boolean
+  }
+)
+
+noteSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
+const Note = mongoose.model('Note', noteSchema)*/
+
+
+
+
+/*let notes = [
   {
     id: 1,
     content: "HTML is easy",
@@ -32,7 +77,7 @@ let notes = [
       date: "2023-01-30T19:20:14.298Z",
       important: true
     }
-  ]
+  ]*/
 
   
 const requestLogger = (request, response, next) => {
@@ -63,12 +108,23 @@ app.get('/', (request, response) => {
 
 // Route for all note's objects or resources - returns all note's objects or resources
 app.get('/api/notes', (request, response) => {
-    response.json(notes)
+    // response.json(notes)
+    Note.find({}).then(allNotes => {
+      response.json(allNotes)
+    })
+
 })
 
 // Route for getting or fetching a specific note via its id number
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
+  
+  Note.findById(request.params.id).then(returnedNote => {
+    response.json(returnedNote)
+  })
+
+
+  // ---------------------------------------------------------------------//
+  /*const id = Number(request.params.id)
   const note = notes.find(note => note.id === id)
 
   // Handle the scenerio when a requested resource does not exist
@@ -78,7 +134,7 @@ app.get('/api/notes/:id', (request, response) => {
     response.statusMessage = 
       "The requested resource's id does not exist in the DB, please, ensure that the resources exists and use its correct id in your request."
     response.status(404).send()
-  }
+  }*/
 })
 
 // Route for deleting a specific note via its id number
@@ -104,22 +160,24 @@ app.post('/api/notes', (request, response) => {
 
   // check to know if the request is empty
   const body = request.body
-  if(!body.content){
-    response.status(400).json({
+
+  if(body.content === undefined){
+    return response.status(400).json({
       "error": "Missing content."
     })
   }
 
-  const newNote = {
-    "content": body.content,
-    "important": body.important || false,
-    "date": new Date(),
-    "id": generateId()
-  }
+  const newNote = new Note(
+    {
+      content: body.content,
+      important: body.important || false
+    }
+  )
 
-  notes.concat(newNote)
+  newNote.save().then(savedNote => {
+    response.json(savedNote)
+  })
 
-  response.json(newNote)
 })
 
 
@@ -128,7 +186,7 @@ const unknownEndpoint = (request, response) => {
 }
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
