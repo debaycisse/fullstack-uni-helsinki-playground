@@ -12,7 +12,7 @@ mongoose
             console.log(`connected to MongoDB`)
         })
         .catch((error) => {
-            console.log(`error while connecting to MongoDB ${error.message}`)
+            console.log(`error while connecting to MongoDB >> ${error.message}`)
         })
 
 const noteSchema = new mongoose.Schema(

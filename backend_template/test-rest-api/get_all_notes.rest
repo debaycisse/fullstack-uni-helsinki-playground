@@ -11,11 +11,6 @@ POST http://localhost:3001/api/notes HTTP/1.1
 Content-Type: application/json
 
 {
-<<<<<<< HEAD
-    "content": "Testing",
-    "important": false
-=======
     "content": "Html is simple",
     "important": true
->>>>>>> cbec668b125cc372fb3533dcc0bddd9ed41055ce
 }
