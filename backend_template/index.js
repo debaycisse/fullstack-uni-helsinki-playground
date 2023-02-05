@@ -80,6 +80,7 @@ const Note = mongoose.model('Note', noteSchema)*/
   ]*/
 
   
+//  custom middleware creation
 const requestLogger = (request, response, next) => {
   console.log('Method: ', request.method);
   console.log('Path: ', request.path);
@@ -87,17 +88,19 @@ const requestLogger = (request, response, next) => {
   console.log('------------------------');
   next()
 }
+  
 
 
+// Middlewares
+app.use(express.static('build'))
 app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources 
-
 app.use(requestLogger)
-
 app.use(cors())
-
 app.use(morgan('combined'))
 
-app.use(express.static('build'))
+
+
+
 
 // Route for the root - returns all an H1 element.
 app.get('/', (request, response) => {
@@ -119,8 +122,13 @@ app.get('/api/notes', (request, response) => {
 app.get('/api/notes/:id', (request, response) => {
   
   Note.findById(request.params.id).then(returnedNote => {
-    response.json(returnedNote)
-  })
+    if(returnedNote){
+      response.json(returnedNote)
+    }
+    else{
+      response.status(404).end()
+    }
+  }).catch(error => next(error))
 
 
   // ---------------------------------------------------------------------//
@@ -138,7 +146,7 @@ app.get('/api/notes/:id', (request, response) => {
 })
 
 // Route for deleting a specific note via its id number
-app.delete('/api/notes/:id', (request, response) => {
+app.delete('/api/notes/:id', (request, response) => { // best way to delete is using findIdAndRemove method
   const id = Number(request.params.id)
   notes = notes.filter(note => note.id !== id)
   response.status(204).end()
@@ -181,10 +189,25 @@ app.post('/api/notes', (request, response) => {
 })
 
 
+
+
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+  response.status(404).send({ error: 'unknown endpoint or route' })
 }
-app.use(unknownEndpoint)
+app.use(unknownEndpoint)  // handler of requests with unlnown endpoint (route)
+
+
+const errorHandler = (error, request, response, next) => {
+  console.log(`Error Message : ${error.message}`)
+  
+  if (error.name === 'CastError'){
+    return response.status(400).send({error: 'malformatted id'})
+  }
+  
+  next(error)
+}
+app.use(errorHandler) // This has to be the last loaded middleware
+
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
