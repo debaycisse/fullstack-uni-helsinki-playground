@@ -14,3 +14,12 @@ Content-Type: application/json
     "content": "Html is simple",
     "important": true
 }
+
+###
+PUT http://localhost:3001/api/notes/63d8a1bc7841b14e7be6b57f HTTP/1.1
+Content-Type: application/json
+
+{
+    "content": "HTML is simple - updated",
+    "important": false
+}

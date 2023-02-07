@@ -119,7 +119,7 @@ app.get('/api/notes', (request, response) => {
 })
 
 // Route for getting or fetching a specific note via its id number
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   
   Note.findById(request.params.id).then(returnedNote => {
     if(returnedNote){
@@ -146,11 +146,43 @@ app.get('/api/notes/:id', (request, response) => {
 })
 
 // Route for deleting a specific note via its id number
-app.delete('/api/notes/:id', (request, response) => { // best way to delete is using findIdAndRemove method
-  const id = Number(request.params.id)
-  notes = notes.filter(note => note.id !== id)
-  response.status(204).end()
+app.delete('/api/notes/:id', (request, response) => { // best way to delete is using findByIdAndRemove() method
+
+  Note.findByIdAndRemove(request.params.id).then(result => {
+    /**
+     * In both cases of
+     * 1 - when a note with the given id exists
+     * 2 - when a note with the given id doesn't exist 
+     * the delete will still return a successful status of 204.
+     * Though, one can check if an actual was deleted or not
+     * by using the returned result variable
+    */  
+    response.status(204).end()
+  }).catch(error => next(error))
+
 })
+
+
+/* 
+ * The toggling of the important property of a note can 
+ * accomplished by using findByIdAndUpdate() method
+*/
+app.put('/api/notes/:id', (request, response, next) => {
+  const body = request.body
+
+  const note = {
+    content: body.content,
+    important: body.important
+  }
+
+  Note.findByIdAndUpdate(request.params.id, note, {new: true})  // parameter '{new: true}' causes this event handler to be called with the newly created object 'note' instead of the existing object that owns the given id
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+}
+)
+
 
 const generateId = () => {
   const maxId = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
