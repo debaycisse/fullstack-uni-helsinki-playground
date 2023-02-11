@@ -154,7 +154,7 @@ app.delete('/api/notes/:id', (request, response) => { // best way to delete is u
      * 1 - when a note with the given id exists
      * 2 - when a note with the given id doesn't exist 
      * the delete will still return a successful status of 204.
-     * Though, one can check if an actual was deleted or not
+     * Though, one can check if an actual resource was deleted or not
      * by using the returned result variable
     */  
     response.status(204).end()
@@ -164,7 +164,7 @@ app.delete('/api/notes/:id', (request, response) => { // best way to delete is u
 
 
 /* 
- * The toggling of the important property of a note can 
+ * The toggling of the important property of a note can be
  * accomplished by using findByIdAndUpdate() method
 */
 app.put('/api/notes/:id', (request, response, next) => {
@@ -189,7 +189,7 @@ const generateId = () => {
   return maxId + 1
 }
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   // const maxID = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
   // const newNote = request.body
   // newNote.id = maxID + 1
@@ -198,25 +198,29 @@ app.post('/api/notes', (request, response) => {
 
   // response.json(newNote)
 
-  // check to know if the request is empty
+  // check to know if the body of the request is empty
   const body = request.body
 
-  if(body.content === undefined){
+  /*if(body.content === undefined){
     return response.status(400).json({
       "error": "Missing content."
     })
-  }
+  }*/
 
   const newNote = new Note(
     {
       content: body.content,
-      important: body.important || false
+      important: body.important || false,
+      date: new Date(),
     }
   )
 
-  newNote.save().then(savedNote => {
-    response.json(savedNote)
-  })
+  newNote
+    .save()
+      .then(savedNote => {
+        response.json(savedNote)
+      })
+      .catch(error => next(error))
 
 })
 
@@ -234,6 +238,9 @@ const errorHandler = (error, request, response, next) => {
   
   if (error.name === 'CastError'){
     return response.status(400).send({error: 'malformatted id'})
+  }
+  else if (error.name === 'ValidationError'){
+    return response.status(400).json({error: error.message})
   }
   
   next(error)
