@@ -168,19 +168,34 @@ app.delete('/api/notes/:id', (request, response) => { // best way to delete is u
  * accomplished by using findByIdAndUpdate() method
 */
 app.put('/api/notes/:id', (request, response, next) => {
-  const body = request.body
+  const {content, important} = request.body
+  
+  Note.findByIdAndUpdate(
+    request.params.id,
+    {content, important},
+    {new: true, runValidators: true, context: 'query'}
+    )
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+
+  
+  /*const {content, important} = request.body
 
   const note = {
-    content: body.content,
-    important: body.important
+    content: content,
+    important: important
   }
 
   Note.findByIdAndUpdate(request.params.id, note, {new: true})  // parameter '{new: true}' causes this event handler to be called with the newly created object 'note' instead of the existing object that owns the given id
     .then(updatedNote => {
       response.json(updatedNote)
     })
-    .catch(error => next(error))
-}
+    .catch(error => next(error))*/
+
+  }
+
 )
 
 
