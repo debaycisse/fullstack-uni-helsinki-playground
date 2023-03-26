@@ -1,6 +1,6 @@
 /**
- * It's important that dotenv gets imported before the note model is imported. 
- * This ensures that the environment variables from the .env file are available 
+ * It's important that dotenv gets imported before the note model is imported.
+ * This ensures that the environment variables from the .env file are available
  * globally before the code from the other modules is imported.
  */
 require('dotenv').config()
@@ -79,21 +79,21 @@ const Note = mongoose.model('Note', noteSchema)*/
     }
   ]*/
 
-  
+
 //  custom middleware creation
 const requestLogger = (request, response, next) => {
-  console.log('Method: ', request.method);
-  console.log('Path: ', request.path);
-  console.log('Body: ', request.body);
-  console.log('------------------------');
-  next()
+    console.log('Method:- ', request.method)
+    console.log('Path:- ', request.path)
+    console.log('Body:- ', request.body)
+    console.log('------------------------')
+    next()
 }
-  
+
 
 
 // Middlewares
 app.use(express.static('build'))
-app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources 
+app.use(express.json())   // this ensures that we will be able use JSON_parser -> https://fullstackopen.com/en/part3/node_js_and_express#deleting-resources
 app.use(requestLogger)
 app.use(cors())
 app.use(morgan('combined'))
@@ -113,33 +113,33 @@ app.get('/', (request, response) => {
 app.get('/api/notes', (request, response) => {
     // response.json(notes)
     Note.find({}).then(allNotes => {
-      response.json(allNotes)
+        response.json(allNotes)
     })
 
 })
 
 // Route for getting or fetching a specific note via its id number
 app.get('/api/notes/:id', (request, response, next) => {
-  
-  Note.findById(request.params.id).then(returnedNote => {
-    if(returnedNote){
-      response.json(returnedNote)
-    }
-    else{
-      response.status(404).end()
-    }
-  }).catch(error => next(error))
+
+    Note.findById(request.params.id).then(returnedNote => {
+        if(returnedNote){
+            response.json(returnedNote)
+        }
+        else{
+            response.status(404).end()
+        }
+    }).catch(error => next(error))
 
 
-  // ---------------------------------------------------------------------//
-  /*const id = Number(request.params.id)
+    // ---------------------------------------------------------------------//
+    /*const id = Number(request.params.id)
   const note = notes.find(note => note.id === id)
 
   // Handle the scenerio when a requested resource does not exist
   if(note){
     response.json(note)
   }else{
-    response.statusMessage = 
+    response.statusMessage =
       "The requested resource's id does not exist in the DB, please, ensure that the resources exists and use its correct id in your request."
     response.status(404).send()
   }*/
@@ -148,40 +148,40 @@ app.get('/api/notes/:id', (request, response, next) => {
 // Route for deleting a specific note via its id number
 app.delete('/api/notes/:id', (request, response) => { // best way to delete is using findByIdAndRemove() method
 
-  Note.findByIdAndRemove(request.params.id).then(result => {
+    Note.findByIdAndRemove(request.params.id).then(result => {
     /**
      * In both cases of
      * 1 - when a note with the given id exists
-     * 2 - when a note with the given id doesn't exist 
+     * 2 - when a note with the given id doesn't exist
      * the delete will still return a successful status of 204.
      * Though, one can check if an actual resource was deleted or not
      * by using the returned result variable
-    */  
-    response.status(204).end()
-  }).catch(error => next(error))
+    */
+        response.status(204).end()
+    }).catch(error => next(error))
 
 })
 
 
-/* 
+/*
  * The toggling of the important property of a note can be
  * accomplished by using findByIdAndUpdate() method
 */
 app.put('/api/notes/:id', (request, response, next) => {
-  const {content, important} = request.body
-  
-  Note.findByIdAndUpdate(
-    request.params.id,
-    {content, important},
-    {new: true, runValidators: true, context: 'query'}
-    )
-    .then(updatedNote => {
-      response.json(updatedNote)
-    })
-    .catch(error => next(error))
+    const { content, important } = request.body
 
-  
-  /*const {content, important} = request.body
+    Note.findByIdAndUpdate(
+        request.params.id,
+        { content, important },
+        { new: true, runValidators: true, context: 'query' }
+    )
+        .then(updatedNote => {
+            response.json(updatedNote)
+        })
+        .catch(error => next(error))
+
+
+    /*const {content, important} = request.body
 
   const note = {
     content: content,
@@ -194,48 +194,48 @@ app.put('/api/notes/:id', (request, response, next) => {
     })
     .catch(error => next(error))*/
 
-  }
+}
 
 )
 
 
 const generateId = () => {
-  const maxId = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
-  return maxId + 1
+    const maxId = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
+    return maxId + 1
 }
 
 app.post('/api/notes', (request, response, next) => {
-  // const maxID = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
-  // const newNote = request.body
-  // newNote.id = maxID + 1
+    // const maxID = notes.length > 0? Math.max(...notes.map(n => n.id)) : 0
+    // const newNote = request.body
+    // newNote.id = maxID + 1
 
-  // notes.concat(newNote)
+    // notes.concat(newNote)
 
-  // response.json(newNote)
+    // response.json(newNote)
 
-  // check to know if the body of the request is empty
-  const body = request.body
+    // check to know if the body of the request is empty
+    const body = request.body
 
-  /*if(body.content === undefined){
+    /*if(body.content === undefined){
     return response.status(400).json({
       "error": "Missing content."
     })
   }*/
 
-  const newNote = new Note(
-    {
-      content: body.content,
-      important: body.important || false,
-      date: new Date(),
-    }
-  )
+    const newNote = new Note(
+        {
+            content: body.content,
+            important: body.important || false,
+            date: new Date(),
+        }
+    )
 
-  newNote
-    .save()
-      .then(savedNote => {
-        response.json(savedNote)
-      })
-      .catch(error => next(error))
+    newNote
+        .save()
+        .then(savedNote => {
+            response.json(savedNote)
+        })
+        .catch(error => next(error))
 
 })
 
@@ -243,22 +243,22 @@ app.post('/api/notes', (request, response, next) => {
 
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint or route' })
+    response.status(404).send({ error: 'unknown endpoint or route' })
 }
 app.use(unknownEndpoint)  // handler of requests with unlnown endpoint (route)
 
 
 const errorHandler = (error, request, response, next) => {
-  console.log(`Error Message : ${error.message}`)
-  
-  if (error.name === 'CastError'){
-    return response.status(400).send({error: 'malformatted id'})
-  }
-  else if (error.name === 'ValidationError'){
-    return response.status(400).json({error: error.message})
-  }
-  
-  next(error)
+    console.log(`Error Message : ${error.message}`)
+
+    if (error.name === 'CastError'){
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+    else if (error.name === 'ValidationError'){
+        return response.status(400).json({ error: error.message })
+    }
+
+    next(error)
 }
 app.use(errorHandler) // This has to be the last loaded middleware
 
