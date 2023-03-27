@@ -17,6 +17,10 @@ const mongoose = require('mongoose')
 
 const Note = require('./models/note')
 
+const logger = require('./utils/logger')
+
+const config = require('./utils/config')
+
 
 
 // DO NOT SAVE YOUR PASSWORD TO GITHUB!!
@@ -249,7 +253,8 @@ app.use(unknownEndpoint)  // handler of requests with unlnown endpoint (route)
 
 
 const errorHandler = (error, request, response, next) => {
-    console.log(`Error Message : ${error.message}`)
+    // console.log(`Error Message : ${error.message}`)
+    logger.info(`Error Message : ${error.message}`)
 
     if (error.name === 'CastError'){
         return response.status(400).send({ error: 'malformatted id' })
@@ -263,9 +268,8 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler) // This has to be the last loaded middleware
 
 
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
+app.listen(config.PORT, () => {
+    logger.info(`Server is running on port ${config.PORT}`)
 })
 
 

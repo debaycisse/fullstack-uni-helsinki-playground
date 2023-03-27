@@ -11,15 +11,15 @@ POST http://localhost:3001/api/notes HTTP/1.1
 Content-Type: application/json
 
 {
-    "content": "Html is simple",
+    "content": "CSS is the design means for web docs.",
     "important": true
 }
 
 ###
-PUT http://localhost:3001/api/notes/63d8a1bc7841b14e7be6b57f HTTP/1.1
+PUT http://localhost:3001/api/notes/63df6cf6eb6a013d64eca998 HTTP/1.1
 Content-Type: application/json
 
 {
-    "content": "HTML is simple - updated",
-    "important": false
+    "content": "lol",
+    "important": true
 }
