@@ -4,20 +4,24 @@ mongoose.set('strictQuery', false)
 
 const mongoDbUrl = process.env.MONGODB_URI
 
-console.log(`connecting to MongoDB`)
+console.log('connecting to MongoDB')
 
 mongoose
     .connect(mongoDbUrl)
-        .then(result => {
-            console.log(`connected to MongoDB`)
-        })
-        .catch((error) => {
-            console.log(`error while connecting to MongoDB >> ${error.message}`)
-        })
+    .then(result => {
+        console.log('connected to MongoDB')
+    })
+    .catch((error) => {
+        console.log(`error while connecting to MongoDB >> ${error.message}`)
+    })
 
 const noteSchema = new mongoose.Schema(
     {
-        content: String,
+        content: {
+            type: String,
+            minLength: 5,
+            required: true
+        },
         important: Boolean
     }
 )
